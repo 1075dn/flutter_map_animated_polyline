@@ -67,33 +67,46 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           Icon(Icons.animation),
           Icon(Icons.arrow_forward_ios),
-          ElevatedButton(
-              child:
-                  Text('SMALL', style: TextStyle(fontWeight: FontWeight.bold)),
-              onPressed: () {
-                var an = polylineLayer.polylines[1].newAnimation(
-                    Duration(
-                        milliseconds: (polylineLayer.polylines[1].meterLength /
-                                polylineLayer.maxMeterLength *
-                                longestDuration.inMilliseconds)
-                            .toInt()),
-                    Curves.easeInOut,
-                    () {});
-                an.forward();
-              }),
-          ElevatedButton(
-              child: Text('BIG', style: TextStyle(fontWeight: FontWeight.bold)),
-              onPressed: () {
-                var an = polylineLayer.polylines[0].newAnimation(
-                    Duration(
-                        milliseconds: (polylineLayer.polylines[0].meterLength /
-                                polylineLayer.maxMeterLength *
-                                longestDuration.inMilliseconds)
-                            .toInt()),
-                    Curves.easeInOut,
-                    () {});
-                an.forward();
-              }),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
+                child: Text('SMALL',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  var an = polylineLayer.polylines[1].newAnimation(
+                      Duration(
+                          milliseconds:
+                              (polylineLayer.polylines[1].meterLength /
+                                      polylineLayer.maxMeterLength *
+                                      longestDuration.inMilliseconds)
+                                  .toInt()),
+                      Curves.easeInOut,
+                      () {});
+                  an.forward();
+                }),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
+                child:
+                    Text('BIG', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  var an = polylineLayer.polylines[0].newAnimation(
+                      Duration(
+                          milliseconds:
+                              (polylineLayer.polylines[0].meterLength /
+                                      polylineLayer.maxMeterLength *
+                                      longestDuration.inMilliseconds)
+                                  .toInt()),
+                      Curves.easeInOut,
+                      () {});
+                  an.forward();
+                }),
+          ),
         ],
       ),
       body: FlutterMap(
