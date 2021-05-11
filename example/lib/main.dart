@@ -49,11 +49,11 @@ class _MyHomePageState extends State<MyHomePage> {
         strokeWidth: 3.0,
       ),
       AnimatedPolyline(
-        // isDotted: true,
+        isDotted: true,
         gradientColors: [Colors.blue, Colors.blue[900]],
         colorsStop: [0.0, 1.0],
         points: getPoints(1),
-        strokeWidth: 3.0,
+        strokeWidth: 4.0,
       ),
     ],
   );
