@@ -26,46 +26,72 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  AnimationController animationController;
-  var pct = 0.0;
+class _MyHomePageState extends State<MyHomePage> {
+  Marker makeMarker(LatLng point, Color color) => Marker(
+      point: point,
+      height: 15,
+      width: 15,
+      builder: (ctx) => CircleAvatar(
+            backgroundColor: color,
+          ));
 
-  void _animate() {
-    // Create some tweens. These serve to split up the transition from one location to another.
-    // In our case, we want to split the transition be<tween> our current map center and the destination.
-    var _tween = Tween<double>(begin: 0.00, end: 1.0);
+  var polylineLayer = AnimatedPolylineLayerOptions(
+    polylineCulling: true,
+    polylines: [
+      //higher z-index lower in list
 
-    // Create a animation animationController that has a duration and a TickerProvider.
-    animationController =
-        AnimationController(duration: const Duration(seconds: 5), vsync: this);
-    // The animation determines what path the animation will take. You can try different Curves values, although I found
-    // fastOutSlowIn to be my favorite.
-    Animation<double> animation =
-        CurvedAnimation(parent: animationController, curve: Curves.easeInOut);
-
-    animationController.addListener(() {
-      setState(() {
-        pct = _tween.evaluate(animation);
-      });
-    });
-
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed ||
-          status == AnimationStatus.dismissed) {
-        animationController.dispose();
-        animationController = null;
-      }
-    });
-
-    animationController.forward();
-  }
-
+      AnimatedPolyline(
+        // isDotted: true,
+        gradientColors: [Colors.green, Colors.green[900]],
+        colorsStop: [0.0, 1.0],
+        points: getPoints(0),
+        strokeWidth: 3.0,
+      ),
+      AnimatedPolyline(
+        // isDotted: true,
+        gradientColors: [Colors.blue, Colors.blue[900]],
+        colorsStop: [0.0, 1.0],
+        points: getPoints(1),
+        strokeWidth: 3.0,
+      ),
+    ],
+  );
   Widget build(BuildContext context) {
+    print(polylineLayer.polylines[0].meterLength /
+        polylineLayer.maxMeterLength *
+        5);
     return Scaffold(
       appBar: AppBar(
         title: Text('Animated Polyline'),
         actions: [
-          IconButton(icon: Icon(Icons.play_arrow), onPressed: _animate)
+          IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () {
+                var an = polylineLayer.polylines[1].newAnimation(
+                    Duration(
+                        milliseconds: (polylineLayer.polylines[1].meterLength /
+                                polylineLayer.maxMeterLength *
+                                5000)
+                            .toInt()),
+                    Curves.easeInOut, () {
+                  print('done');
+                });
+                an.forward();
+              }),
+          IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () {
+                var an = polylineLayer.polylines[0].newAnimation(
+                    Duration(
+                        milliseconds: (polylineLayer.polylines[0].meterLength /
+                                polylineLayer.maxMeterLength *
+                                5000)
+                            .toInt()),
+                    Curves.easeInOut, () {
+                  print('done');
+                });
+                an.forward();
+              }),
         ],
       ),
       body: FlutterMap(
@@ -73,26 +99,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           plugins: [
             AnimatedPolylineMapPlugin(),
           ],
-          center: LatLng(45.1313258, 5.5171205),
-          zoom: 11.0,
+          bounds: LatLngBounds.fromPoints(getPoints(0))
+            ..extendBounds(LatLngBounds.fromPoints(getPoints(1))),
+          boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(20)),
         ),
         layers: [
           TileLayerOptions(
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             subdomains: ['a', 'b', 'c'],
           ),
-          AnimatedPolylineLayerOptions(
-            polylineCulling: true,
-            polylines: [
-              PctPolyline(
-                isDotted: true,
-                points: getPoints(0),
-                color: Colors.red,
-                strokeWidth: 5.0,
-                pct: pct,
-              ),
-            ],
-          )
+          polylineLayer,
+          MarkerLayerOptions(markers: [
+            makeMarker(getPoints(0)[0], Colors.green),
+            makeMarker(
+                getPoints(0)[getPoints(0).length - 1], Colors.green[900]),
+            makeMarker(getPoints(1)[0], Colors.blue),
+            makeMarker(getPoints(1)[getPoints(1).length - 1], Colors.blue[900]),
+          ])
         ],
       ),
     );
