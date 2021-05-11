@@ -57,9 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
     ],
   );
   Widget build(BuildContext context) {
-    print(polylineLayer.polylines[0].meterLength /
-        polylineLayer.maxMeterLength *
-        5);
     return Scaffold(
       appBar: AppBar(
         title: Text('Animated Polyline'),
@@ -73,9 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 polylineLayer.maxMeterLength *
                                 5000)
                             .toInt()),
-                    Curves.easeInOut, () {
-                  print('done');
-                });
+                    Curves.easeInOut,
+                    () {});
                 an.forward();
               }),
           IconButton(
@@ -87,9 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 polylineLayer.maxMeterLength *
                                 5000)
                             .toInt()),
-                    Curves.easeInOut, () {
-                  print('done');
-                });
+                    Curves.easeInOut,
+                    () {});
                 an.forward();
               }),
         ],
