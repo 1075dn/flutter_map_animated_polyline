@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -56,32 +57,38 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     ],
   );
+
+  var longestDuration = Duration(seconds: 5);
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Animated Polyline'),
         actions: [
-          IconButton(
-              icon: Icon(Icons.play_arrow),
+          Icon(Icons.animation),
+          Icon(Icons.arrow_forward_ios),
+          ElevatedButton(
+              child:
+                  Text('SMALL', style: TextStyle(fontWeight: FontWeight.bold)),
               onPressed: () {
                 var an = polylineLayer.polylines[1].newAnimation(
                     Duration(
                         milliseconds: (polylineLayer.polylines[1].meterLength /
                                 polylineLayer.maxMeterLength *
-                                5000)
+                                longestDuration.inMilliseconds)
                             .toInt()),
                     Curves.easeInOut,
                     () {});
                 an.forward();
               }),
-          IconButton(
-              icon: Icon(Icons.play_arrow),
+          ElevatedButton(
+              child: Text('BIG', style: TextStyle(fontWeight: FontWeight.bold)),
               onPressed: () {
                 var an = polylineLayer.polylines[0].newAnimation(
                     Duration(
                         milliseconds: (polylineLayer.polylines[0].meterLength /
                                 polylineLayer.maxMeterLength *
-                                5000)
+                                longestDuration.inMilliseconds)
                             .toInt()),
                     Curves.easeInOut,
                     () {});
