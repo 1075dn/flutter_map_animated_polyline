@@ -114,9 +114,8 @@ class _MyHomePageState extends State<MyHomePage> {
           plugins: [
             AnimatedPolylineMapPlugin(),
           ],
-          bounds: LatLngBounds.fromPoints(getPoints(0))
-            ..extendBounds(LatLngBounds.fromPoints(getPoints(1))),
-          boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(20)),
+          bounds: LatLngBounds.fromPoints([...getPoints(0), ...getPoints(1)]),
+          boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(30)),
         ),
         layers: [
           TileLayerOptions(
