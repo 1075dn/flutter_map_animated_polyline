@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_animated_polyline/v3/projected_polyline.dart';
-import 'package:flutter_map_animated_polyline/v3/animator.dart';
+import 'package:flutter_map_animated_polyline/flutter_map_animated_polyline.dart';
 import 'package:latlong/latlong.dart';
 import './data.dart';
 
@@ -37,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    projected = ProjectedPointList(getPoints(1));
+    projected = ProjectedPointList(getPoints(0));
   }
 
   Widget build(BuildContext context) {
@@ -68,8 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   animationDuration: Duration(seconds: 10),
                   animationCurve: Curves.easeInSine,
                   onValueChange: (value) {
-                    print('${DateTime.now().millisecondsSinceEpoch} $value');
-
                     setState(() {
                       pointsToShow = projected.portion(value);
                     });
@@ -80,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: FlutterMap(
         options: MapOptions(
-          bounds: LatLngBounds.fromPoints(getPoints(1)),
+          bounds: LatLngBounds.fromPoints(getPoints(0)),
           boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(30)),
         ),
         layers: [
@@ -94,7 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 points: pointsToShow,
                 gradientColors: [Colors.blue, Colors.blue[900]],
                 colorsStop: [0.0, 1.0],
-                strokeWidth: 10.0,
+                strokeWidth: 5.0,
+                isDotted: true,
               ),
             ],
           ),
