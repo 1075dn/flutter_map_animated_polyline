@@ -39,6 +39,14 @@ class _MyHomePageState extends State<MyHomePage> {
     projected = ProjectedPointList(getPoints(0));
   }
 
+  Marker makeMarker(LatLng point, Color color) => Marker(
+      point: point,
+      height: 15,
+      width: 15,
+      builder: (ctx) => CircleAvatar(
+            backgroundColor: color,
+          ));
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -89,11 +97,17 @@ class _MyHomePageState extends State<MyHomePage> {
             polylines: [
               Polyline(
                 points: pointsToShow,
-                gradientColors: [Colors.blue, Colors.blue[900]],
+                gradientColors: [Colors.orange, Colors.orange[900]],
                 colorsStop: [0.0, 1.0],
                 strokeWidth: 5.0,
-                isDotted: true,
+                // isDotted: true,
               ),
+            ],
+          ),
+          MarkerLayerOptions(
+            markers: [
+              makeMarker(getPoints(0).first, Colors.orange),
+              makeMarker(getPoints(0).last, Colors.orange[900]),
             ],
           ),
         ],
