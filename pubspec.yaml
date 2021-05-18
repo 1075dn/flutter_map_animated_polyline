@@ -15,6 +15,7 @@ dependencies:
   flutter_map: any
   # drawing_animation: any
   maps_toolkit: any
+  flutter_map_tappable_polyline: any
 
 dev_dependencies:
   flutter_test:
