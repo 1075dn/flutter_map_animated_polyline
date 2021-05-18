@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_animated_polyline/flutter_map_animated_polyline.dart';
+import 'package:flutter_map_animated_polyline/v3/projected_polyline.dart';
+import 'package:flutter_map_animated_polyline/v3/animator.dart';
 import 'package:latlong/latlong.dart';
 import './data.dart';
 
@@ -28,93 +29,58 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Marker makeMarker(LatLng point, Color color) => Marker(
-      point: point,
-      height: 15,
-      width: 15,
-      builder: (ctx) => CircleAvatar(
-            backgroundColor: color,
-          ));
+  List<LatLng> pointsToShow = [];
+  ProjectedPointList projected;
 
-  var polylineLayer = AnimatedPolylineLayerOptions(
-    polylineCulling: true,
-    polylines: [
-      //higher z-index lower in list
+  var animator = EasyAnimationController();
 
-      AnimatedPolyline(
-        // isDotted: true,
-        gradientColors: [Colors.green, Colors.green[900]],
-        colorsStop: [0.0, 1.0],
-        points: getPoints(0),
-        strokeWidth: 3.0,
-      ),
-      AnimatedPolyline(
-        isDotted: true,
-        gradientColors: [Colors.blue, Colors.blue[900]],
-        colorsStop: [0.0, 1.0],
-        points: getPoints(1),
-        strokeWidth: 4.0,
-      ),
-    ],
-  );
-
-  var longestDuration = Duration(seconds: 5);
+  @override
+  void initState() {
+    super.initState();
+    projected = ProjectedPointList(getPoints(1));
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Animated Polyline'),
         actions: [
-          Icon(Icons.animation),
-          Icon(Icons.arrow_forward_ios),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
-                child: Text('SMALL',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  var an = polylineLayer.polylines[1].newAnimation(
-                      Duration(
-                          milliseconds:
-                              (polylineLayer.polylines[1].meterLength /
-                                      polylineLayer.maxMeterLength *
-                                      longestDuration.inMilliseconds)
-                                  .toInt()),
-                      Curves.easeInOut,
-                      () {});
-                  an.forward();
-                }),
+          IconButton(
+            icon: Icon(Icons.play_arrow_rounded),
+            onPressed: () {
+              animator.start(
+                  initialPortion: 0.0,
+                  finishedPortion: 1.0,
+                  animationDuration: Duration(seconds: 10),
+                  animationCurve: Curves.easeInOutCubic,
+                  onValueChange: (value) {
+                    setState(() {
+                      pointsToShow = projected.portion(value);
+                    });
+                  });
+            },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-            child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
-                child:
-                    Text('BIG', style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  var an = polylineLayer.polylines[0].newAnimation(
-                      Duration(
-                          milliseconds:
-                              (polylineLayer.polylines[0].meterLength /
-                                      polylineLayer.maxMeterLength *
-                                      longestDuration.inMilliseconds)
-                                  .toInt()),
-                      Curves.easeInOut,
-                      () {});
-                  an.forward();
-                }),
-          ),
+          IconButton(
+            icon: Icon(Icons.fast_rewind_rounded),
+            onPressed: () {
+              animator.start(
+                  initialPortion: 1.0,
+                  finishedPortion: 0.0,
+                  animationDuration: Duration(seconds: 10),
+                  animationCurve: Curves.easeInSine,
+                  onValueChange: (value) {
+                    print('${DateTime.now().millisecondsSinceEpoch} $value');
+
+                    setState(() {
+                      pointsToShow = projected.portion(value);
+                    });
+                  });
+            },
+          )
         ],
       ),
       body: FlutterMap(
         options: MapOptions(
-          plugins: [
-            AnimatedPolylineMapPlugin(),
-          ],
-          bounds: LatLngBounds.fromPoints([...getPoints(0), ...getPoints(1)]),
+          bounds: LatLngBounds.fromPoints(getPoints(1)),
           boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(30)),
         ),
         layers: [
@@ -122,14 +88,16 @@ class _MyHomePageState extends State<MyHomePage> {
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             subdomains: ['a', 'b', 'c'],
           ),
-          polylineLayer,
-          MarkerLayerOptions(markers: [
-            makeMarker(getPoints(0)[0], Colors.green),
-            makeMarker(
-                getPoints(0)[getPoints(0).length - 1], Colors.green[900]),
-            makeMarker(getPoints(1)[0], Colors.blue),
-            makeMarker(getPoints(1)[getPoints(1).length - 1], Colors.blue[900]),
-          ])
+          PolylineLayerOptions(
+            polylines: [
+              Polyline(
+                points: pointsToShow,
+                gradientColors: [Colors.blue, Colors.blue[900]],
+                colorsStop: [0.0, 1.0],
+                strokeWidth: 10.0,
+              ),
+            ],
+          ),
         ],
       ),
     );
