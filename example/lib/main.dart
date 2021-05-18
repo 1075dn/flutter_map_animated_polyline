@@ -28,6 +28,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<LatLng> pointsToShow = [];
+  ProjectedPointList projected;
+
+  var animator = EasyAnimationController();
+
+  @override
+  void initState() {
+    super.initState();
+    projected = ProjectedPointList(getPoints(0));
+  }
+
   Marker makeMarker(LatLng point, Color color) => Marker(
       point: point,
       height: 15,
@@ -36,85 +47,45 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: color,
           ));
 
-  var polylineLayer = AnimatedPolylineLayerOptions(
-    polylineCulling: true,
-    polylines: [
-      //higher z-index lower in list
-
-      AnimatedPolyline(
-        // isDotted: true,
-        gradientColors: [Colors.green, Colors.green[900]],
-        colorsStop: [0.0, 1.0],
-        points: getPoints(0),
-        strokeWidth: 3.0,
-      ),
-      AnimatedPolyline(
-        isDotted: true,
-        gradientColors: [Colors.blue, Colors.blue[900]],
-        colorsStop: [0.0, 1.0],
-        points: getPoints(1),
-        strokeWidth: 4.0,
-      ),
-    ],
-  );
-
-  var longestDuration = Duration(seconds: 5);
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Animated Polyline'),
         actions: [
-          Icon(Icons.animation),
-          Icon(Icons.arrow_forward_ios),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
-                child: Text('SMALL',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  var an = polylineLayer.polylines[1].newAnimation(
-                      Duration(
-                          milliseconds:
-                              (polylineLayer.polylines[1].meterLength /
-                                      polylineLayer.maxMeterLength *
-                                      longestDuration.inMilliseconds)
-                                  .toInt()),
-                      Curves.easeInOut,
-                      () {});
-                  an.forward();
-                }),
+          IconButton(
+            icon: Icon(Icons.play_arrow_rounded),
+            onPressed: () {
+              animator.start(
+                  initialPortion: 0.0,
+                  finishedPortion: 1.0,
+                  animationDuration: Duration(seconds: 10),
+                  animationCurve: Curves.easeInOutCubic,
+                  onValueChange: (value) {
+                    setState(() {
+                      pointsToShow = projected.portion(value);
+                    });
+                  });
+            },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
-            child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero, padding: EdgeInsets.all(5)),
-                child:
-                    Text('BIG', style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  var an = polylineLayer.polylines[0].newAnimation(
-                      Duration(
-                          milliseconds:
-                              (polylineLayer.polylines[0].meterLength /
-                                      polylineLayer.maxMeterLength *
-                                      longestDuration.inMilliseconds)
-                                  .toInt()),
-                      Curves.easeInOut,
-                      () {});
-                  an.forward();
-                }),
-          ),
+          IconButton(
+            icon: Icon(Icons.fast_rewind_rounded),
+            onPressed: () {
+              animator.start(
+                  initialPortion: 1.0,
+                  finishedPortion: 0.0,
+                  animationDuration: Duration(seconds: 10),
+                  animationCurve: Curves.easeInSine,
+                  onValueChange: (value) {
+                    setState(() {
+                      pointsToShow = projected.portion(value);
+                    });
+                  });
+            },
+          )
         ],
       ),
       body: FlutterMap(
         options: MapOptions(
-          plugins: [
-            AnimatedPolylineMapPlugin(),
-          ],
-          bounds: LatLngBounds.fromPoints([...getPoints(0), ...getPoints(1)]),
+          bounds: LatLngBounds.fromPoints(getPoints(0)),
           boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(30)),
         ),
         layers: [
@@ -122,14 +93,23 @@ class _MyHomePageState extends State<MyHomePage> {
             urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             subdomains: ['a', 'b', 'c'],
           ),
-          polylineLayer,
-          MarkerLayerOptions(markers: [
-            makeMarker(getPoints(0)[0], Colors.green),
-            makeMarker(
-                getPoints(0)[getPoints(0).length - 1], Colors.green[900]),
-            makeMarker(getPoints(1)[0], Colors.blue),
-            makeMarker(getPoints(1)[getPoints(1).length - 1], Colors.blue[900]),
-          ])
+          PolylineLayerOptions(
+            polylines: [
+              Polyline(
+                points: pointsToShow,
+                gradientColors: [Colors.orange, Colors.orange[900]],
+                colorsStop: [0.0, 1.0],
+                strokeWidth: 5.0,
+                // isDotted: true,
+              ),
+            ],
+          ),
+          MarkerLayerOptions(
+            markers: [
+              makeMarker(getPoints(0).first, Colors.orange),
+              makeMarker(getPoints(0).last, Colors.orange[900]),
+            ],
+          ),
         ],
       ),
     );
